@@ -4,13 +4,13 @@ import mmap
 
 from datolite.logger import Logger
 from datolite.parser import dpt, Patch
+from datolite.assembler import init_assembler
 
 class Patcher():
-  def __init__(self, src: str, patches: list[str], output: str=None, filler: int=0x90):
+  def __init__(self, src: str, patches: list[str], output: str=None):
     self.src = src
     self.patches = patches
     self.output = output
-    self.filler = filler
     if not self.output:
       splet = self.src.split("/")
       splet[-1] = "patched." + splet[-1]
@@ -24,6 +24,8 @@ class Patcher():
       assert getsize(patch) > 0, format("Patch file {} is empty", patch)
       assert patch.endswith(".dpt"), format("Patch file {} is not a .dpt file", patch)
     
+    init_assembler(self.src)
+    
   def patch(self):
     copy2(self.src, self.output)
     with open(self.output, 'r+b') as f:
@@ -31,17 +33,17 @@ class Patcher():
 
       for patch_file in self.patches:
         Logger.info("Applying patches from {}".format(patch_file.split("/")[-1]))
-        f_patches: list[Patch] = dpt.load(patch_file, self.filler)
+        f_patches: list[Patch] = dpt.load(patch_file)
 
         for patch in f_patches:
           Logger.debug(
-            "(PRE-PATCH) Address {} small dump: {}".format(patch.start, mm[patch.file_offset:patch.file_offset+8].hex(sep=' '))
+            "(PRE-PATCH) Address {} small dump: {}".format(hex(patch.start), mm[patch.file_offset:patch.file_offset+8].hex(sep=' '))
           )
           Logger.info("Patching {} bytes".format(hex(len(patch.dump))))
           mm[patch.file_offset:patch.file_offset+len(patch.dump)] = patch.dump
           Logger.debug(
-            "(POST-PATCH) Address {} small dump: {}".format(patch.start, mm[patch.file_offset:patch.file_offset+8].hex(sep=' '))
+            "(POST-PATCH) Address {} small dump: {}".format(hex(patch.start), mm[patch.file_offset:patch.file_offset+8].hex(sep=' '))
           )
-          print("\n\n")
+          print("\n")
         print("\n")
       mm.flush()

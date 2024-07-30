@@ -16,7 +16,6 @@ def main():
     config["executable"],
     config["patches"],
     (config["output"] if "output" in config else None),
-    (config["filler"] if "filler" in config else 0x90)
   ).patch()
 
 if __name__ == "__main__":
