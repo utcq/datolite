@@ -1,0 +1,6 @@
+{
+  "executable": "testing/test",
+  "patches": [
+    "testing/stringPatch.dpt"
+  ]
+}

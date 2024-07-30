@@ -14,6 +14,10 @@ class dpt:
       map(lambda x: int(x, 16), repr.strip().split(" "))
     )
 
+  def __read_hex(path: str) -> str:
+    with open(path, 'rb') as file:
+      return bytearray(file.read()).hex(sep=' ')
+
   def __syntax_solver(hexdump: str) -> bytearray:
     matches = re.findall(r"[0-9a-z-A-Z]{2}[\s+]?\*[\s+]?[0-9a-zA-Z]+", hexdump, re.MULTILINE)
     for match in matches:
@@ -25,15 +29,20 @@ class dpt:
     matches = re.findall(r"[\s]+\"[0-9a-zA-Z +-_*'\s]+\"", hexdump, re.MULTILINE)
     for match in matches:
       hexdump = hexdump.replace(match, "")
-    
+
+    matches = re.findall(r"\$[\s+]?[a-zA-Z0-9\/.]+", hexdump, re.MULTILINE)
+    for match in matches:
+      path = match[1:].strip()
+      hexdump = hexdump.replace(match, dpt.__read_hex(path))
+    print(hexdump)
     return dpt.__dump_reader(hexdump)
 
-  def __build_biunary(patch: Patch):
+  def __build_biunary(patch: Patch, filler: int):
     nop_filler = (patch.end - patch.start) - len(patch.dump)
     assert nop_filler >= 0, "Patch is too big"
-    patch.dump.extend([0x90]*nop_filler)
+    patch.dump.extend([filler]*nop_filler)
 
-  def load(path: str) -> list[Patch]:
+  def load(path: str, filler: int) -> list[Patch]:
     tables = open(path, 'r').read().split("\n\n---\n\n")
     patches = []
     for table in tables:
@@ -50,5 +59,6 @@ class dpt:
 
       patch.file_offset = patch.start - patch.base - patch.offset
       patch.dump = dpt.__syntax_solver(hexdump)
-      dpt.__build_biunary(patch)
+      dpt.__build_biunary(patch, filler)
+      patches.append(patch)
     return patches

@@ -6,12 +6,15 @@ from datolite.logger import Logger
 from datolite.parser import dpt, Patch
 
 class Patcher():
-  def __init__(self, src: str, patches: list[str], output: str=None):
+  def __init__(self, src: str, patches: list[str], output: str=None, filler: int=0x90):
     self.src = src
     self.patches = patches
     self.output = output
+    self.filler = filler
     if not self.output:
       splet = self.src.split("/")
+      splet[-1] = "patched." + splet[-1]
+      self.output = "/".join(splet)
     
     assert isfile(self.src), "Source file does not exist"
     assert getsize(self.src) > 0, "Source file is empty"
@@ -28,7 +31,7 @@ class Patcher():
 
       for patch_file in self.patches:
         Logger.info("Applying patches from {}".format(patch_file.split("/")[-1]))
-        f_patches: list[Patch] = dpt.load(patch_file)
+        f_patches: list[Patch] = dpt.load(patch_file, self.filler)
 
         for patch in f_patches:
           Logger.debug(
