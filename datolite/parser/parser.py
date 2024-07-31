@@ -60,7 +60,7 @@ class dpt:
     assert nop_filler >= 0, "Patch is too big"
     patch.dump.extend([filler]*nop_filler)
 
-  def load(path: str) -> list[Patch]:
+  def __common_load(path: str, tester: bool) -> list[Patch]:
     tables = open(path, 'r').read().split("\n\n---\n\n")
     patches = []
     for table in tables:
@@ -76,10 +76,17 @@ class dpt:
       )
       if (len(header)> 3):
         patch.filler = int(header[3], 16)
-      else: patch.filler = 0x90
+      else: patch.filler = get_assembler().ks.asm("nop")[0][0]
 
       patch.file_offset = patch.start - patch.base - patch.offset
       patch.dump = dpt.__syntax_solver(hexdump)
-      dpt.__build_biunary(patch, patch.filler)
+      if (not tester):
+        dpt.__build_biunary(patch, patch.filler)
       patches.append(patch)
     return patches
+  
+  def load(path: str) -> list[Patch]:
+    return dpt.__common_load(path, False)
+
+  def load_tester(path: str) -> list[Patch]:
+    return dpt.__common_load(path, True)

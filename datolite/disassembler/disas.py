@@ -1,4 +1,4 @@
-import os, subprocess
+import subprocess
 
 class Disassembler():
   def __init__(self):
@@ -27,7 +27,34 @@ class Disassembler():
     return ' '.join(
       list(map(lambda x: x.strip(), (result)))
     ).upper()
-        
+
+  def __fn_lister(self, cmd_output: str) -> list[tuple[int, str]]:
+    result = []
+    for line in cmd_output.split("\n"):
+      if line.endswith(">:"):
+        result.append(
+          (int(line.split(" ")[0],16),
+          line.split(" ")[-1][1:-2])
+        )
+    return result
+  
+  def analyze_sizes(self, exe_path: str, patch) -> dict[str, tuple[int, int]]:
+    disassembly = subprocess.run(
+      ["objdump", "-d", exe_path],
+      capture_output=True,
+      text=True
+    ).stdout
+
+    functions = self.__fn_lister(disassembly)
+    result = {}
+    for fn in functions:
+      dump = self.__extract_function(disassembly, fn[1])
+      encoded = self.__extract_encoded(dump)
+      fn = (fn[0]+patch.base,fn[1])
+      end = fn[0] + len(encoded.split(" "))
+      if len(encoded.split(" ")) >= len(patch.dump):
+        result[fn[1]] = (fn[0],end)
+    return result
 
   def ccde(self, path: str, function: str) -> str:
     output = path + ".o"
