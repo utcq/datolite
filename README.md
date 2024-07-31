@@ -2,6 +2,10 @@
 
 > **A modular binary patcher**
 
+`pip install datolite`
+
+**Python >= 3.9**
+
 ---
 
 ## Patch File Structure (.dpt)
