@@ -91,3 +91,57 @@ When patching an executable without scripting the process you have to use `root.
 ```
 
 **(Output is optional, if not set it will be `path/patched.filename`)**
+
+## Working with C
+
+So when using the C compilation feature you'll have problems with referencing executable functions.
+To solve this issue you just have to define this macro:
+
+```c
+#define DECLARE(ADDRESS, RET_TYPE, NAME, ...) \
+    typedef RET_TYPE (*NAME##_t)(__VA_ARGS__); \
+    static const NAME##_t NAME = (NAME##_t)(ADDRESS);
+
+#define RELATIVE(offset) ({ \
+    void* _current_address; \
+    void* _target_address = (void*)(&not_present_in_code); \
+    __asm__ volatile ( \
+        "lea (%%rip), %0" \
+        : "=r" (_current_address) \
+    ); \
+    (char*)_target_address - (char*)_current_address + (offset); \
+})
+
+#define RELCALL(offset) ({ \
+    void (*func)(); \
+    void* _target_address = RELATIVE(offset); \
+    func = (void (*)())(_target_address); \
+    func(); \
+})
+
+```
+
+**Then you can use it like this:**
+
+```c
+DECLARE(0x12345678, void, exploit_function)
+DECLARE(0x87654321, int, add, int, int)
+
+int patch_fn() {
+  add(1,2);
+  exploit_function();
+  return 0;
+}
+```
+
+### DECLARE WILL NOT WORK WITH PIE, KASLR AND SIMILIAR MITIGATIONS. USE RELATIVE INSTEAD
+
+```c
+int patch_fn() {
+  int placeholder=0;
+  RELCALL(+0x10);
+  return 0;
+}
+```
+
+This will call any instruction at `instruction_after_placeholder + 0x10`

@@ -16,13 +16,13 @@ class Patcher():
       splet[-1] = "patched." + splet[-1]
       self.output = "/".join(splet)
     
-    assert isfile(self.src), "Source file does not exist"
-    assert getsize(self.src) > 0, "Source file is empty"
-    assert self.src != self.output, "Source file and output file are the same"
+    Logger.cassert(isfile(self.src), "Source file does not exist")
+    Logger.cassert(getsize(self.src) > 0, "Source file is empty")
+    Logger.cassert(self.src != self.output, "Source file and output file are the same")
     for patch in self.patches:
-      assert isfile(patch), format("Patch file {} does not exist", patch)
-      assert getsize(patch) > 0, format("Patch file {} is empty", patch)
-      assert patch.endswith(".dpt"), format("Patch file {} is not a .dpt file", patch)
+      Logger.cassert(isfile(patch), "Patch file {} does not exist".format(patch))
+      Logger.cassert(getsize(patch) > 0, "Patch file {} is empty".format(patch))
+      Logger.cassert(patch.endswith(".dpt"), "Patch file {} is not a .dpt file".format(patch))
     
     init_assembler(self.src)
     
@@ -39,8 +39,8 @@ class Patcher():
           Logger.debug(
             "(PRE-PATCH) Address {} small dump: {}".format(hex(patch.start), mm[patch.file_offset:patch.file_offset+8].hex(sep=' '))
           )
-          Logger.info("Patching {} bytes".format(hex(len(patch.dump))))
           mm[patch.file_offset:patch.file_offset+len(patch.dump)] = patch.dump
+          Logger.info("Patched {} bytes".format(hex(len(patch.dump))))
           Logger.debug(
             "(POST-PATCH) Address {} small dump: {}".format(hex(patch.start), mm[patch.file_offset:patch.file_offset+8].hex(sep=' '))
           )

@@ -1,6 +1,7 @@
 import re
 from datolite.assembler import get_assembler
 from datolite.disassembler import get_disassembler
+from datolite.logger import Logger
 
 class Patch:
   base: int
@@ -22,6 +23,7 @@ class dpt:
       return bytearray(file.read()).hex(sep=' ') + "\n"
 
   def __syntax_solver(hexdump: str) -> bytearray:
+    Logger.warn("Solving Syntax. (Experimental)")
     matches = re.findall(r"[0-9a-z-A-Z]{2}[\s+]?\*[\s+]?[0-9a-zA-Z]+", hexdump, re.MULTILINE)
     for match in matches:
       byte_t = match.split("*")[0].strip() + " "
@@ -57,7 +59,7 @@ class dpt:
 
   def __build_biunary(patch: Patch, filler: int):
     nop_filler = (patch.end - patch.start) - len(patch.dump)
-    assert nop_filler >= 0, "Patch is too big"
+    Logger.cassert(nop_filler >= 0, "Patch is too big")
     patch.dump.extend([filler]*nop_filler)
 
   def __common_load(path: str, tester: bool) -> list[Patch]:

@@ -1,9 +1,12 @@
 import subprocess
 
+from datolite.logger import Logger
+
 class Disassembler():
   def __init__(self):
-    assert subprocess.run(["gcc", "--version"], stdout=subprocess.DEVNULL).returncode == 0, "GCC is not installed"
-    assert subprocess.run(["objdump", "--version"], stdout=subprocess.DEVNULL).returncode == 0, "objdump is not installed"
+    Logger.cassert(subprocess.run(["gcc", "--version"], stdout=subprocess.DEVNULL).returncode == 0, "GCC is not installed")
+    Logger.cassert(subprocess.run(["objdump", "--version"], stdout=subprocess.DEVNULL).returncode == 0, "objdump is not installed")
+    Logger.info("Tools present, Initialized disassembler")
   
   def __extract_function(self, cmd_output: str, fn_name: str) -> str:
     result = []
@@ -37,6 +40,24 @@ class Disassembler():
           line.split(" ")[-1][1:-2])
         )
     return result
+
+  def fn_list(self, exe_path: str) -> dict[str, tuple[int, int]]:
+    disassembly = subprocess.run(
+      ["objdump", "-d", exe_path],
+      capture_output=True,
+      text=True
+    ).stdout
+
+    functions = self.__fn_lister(disassembly)
+    result = {}
+    for fn in functions:
+      dump = self.__extract_function(disassembly, fn[1])
+      encoded = self.__extract_encoded(dump)
+      fn = (fn[0]+0x1000000,fn[1])
+      end = fn[0] + len(encoded.split(" "))
+      result[fn[1]] = (fn[0],end)
+    return result
+  
   
   def analyze_sizes(self, exe_path: str, patch) -> dict[str, tuple[int, int]]:
     disassembly = subprocess.run(
@@ -62,6 +83,7 @@ class Disassembler():
       ["gcc", "-c", path, "-o", output],
       stdout=subprocess.DEVNULL
     )
+    Logger.info("Compiled C Source: {}".format(path))
     disassembly = subprocess.run(
       ["objdump", "-d", output],
       capture_output=True,
