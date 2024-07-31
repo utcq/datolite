@@ -104,12 +104,11 @@ To solve this issue you just have to define this macro:
 
 #define RELATIVE(offset) ({ \
     void* _current_address; \
-    void* _target_address = (void*)(&not_present_in_code); \
     __asm__ volatile ( \
         "lea (%%rip), %0" \
         : "=r" (_current_address) \
     ); \
-    (char*)_target_address - (char*)_current_address + (offset); \
+    (char*)_current_address + (offset); \
 })
 
 #define RELCALL(offset) ({ \
