@@ -1,0 +1,5 @@
+testing/test
+testing/patched.test
+**/__pycache__/
+TODO
+*.o

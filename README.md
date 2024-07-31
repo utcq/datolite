@@ -48,6 +48,14 @@ BASE HIDDEN_OFFSET START:END (FILLER?)
 
 (Instruction encoding at patch time, the architecutre is detected from the source file)
 
+```r
+BASE HIDDEN_OFFSET START:END (FILLER?)
+
+c=> testing/test.c:main
+```
+
+(Compilation, disassembly and encoding of a C file at patch-time, format `path:function`)
+
 #### ! SPACES AND DASHES ARE IMPORTANT AS THERE ISN'T A LEXER SO THE PARSING IS DONE WITH REGEX!
 
 ---

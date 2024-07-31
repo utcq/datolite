@@ -11,6 +11,9 @@ def main():
   
   assert "executable" in config, "Source file not specified [KEY: executable]"
   assert "patches" in config, "Patches not specified [KEY: patches (array of path)]"
+
+  # dt.disassembler.get_disassembler().ccde("testing/test.c", "main")
+  
   
   dt.Patcher(
     config["executable"],

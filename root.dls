@@ -1,8 +1,6 @@
 {
   "executable": "testing/test",
   "patches": [
-    "testing/patches/stringPatch.dpt",
-    "testing/patches/fnPatch.dpt",
-    "testing/patches/combined.dpt"
+    "testing/patches/csrcPatch.dpt"
   ]
 }

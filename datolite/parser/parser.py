@@ -1,5 +1,6 @@
 import re
 from datolite.assembler import get_assembler
+from datolite.disassembler import get_disassembler
 
 class Patch:
   base: int
@@ -43,6 +44,13 @@ class dpt:
       instruction = match.strip()
       enc, _ = get_assembler().ks.asm(instruction)
       hexdump = hexdump.replace(line, ' '.join(map(lambda x: hex(x)[2:], enc)))
+
+    matches = re.findall(r'c=>?([a-z-A-Z0-9\/._ ]+):([a-zA-Z0-9_]+)', hexdump, re.MULTILINE)
+    for match in matches:
+      line = "c=>" + match[0] + ":" + match[1]
+      path = match[0].strip()
+      function = match[1].strip()
+      hexdump = hexdump.replace(line, get_disassembler().ccde(path, function))
 
     hexdump = ' '.join(hexdump.split("\n"))
     return dpt.__dump_reader(hexdump)
