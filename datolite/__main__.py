@@ -41,23 +41,23 @@ def list_cli():
 
 def ghelp():
   print("Datolite - A complete binary patcher")
-  print("Usage: datolite @patch")
-  print("       datolite @analyze [executable] [patch]")
-  print("       datolite @list [executable]")
-  print("       datolite @help")
+  print("Usage: datolite -patch")
+  print("       datolite -analyze [executable] [patch]")
+  print("       datolite -list [executable]")
+  print("       datolite -help")
   print("\n\n== How To ==")
-  print("   @patch: patches the binary according to the 'root.dls' file")
-  print("   @analyze: finds optimal patch locations for a given patch")
-  print("   @list: List all functions addresses in executable")
+  print("   -patch: patches the binary according to the 'root.dls' file")
+  print("   -analyze: finds optimal patch locations for a given patch")
+  print("   -list: List all functions addresses in executable")
 
 def argparse():
-  if sys.argv[1] == "@analyze":
+  if sys.argv[1] == "-analyze":
     analyzer_cli()
-  elif sys.argv[1] == "@patch":
+  elif sys.argv[1] == "-patch":
     patcher_cli()
-  elif sys.argv[1] == "@list":
+  elif sys.argv[1] == "-list":
     list_cli()
-  elif sys.argv[1] in ["-h", "--help", "@help", "help"]:
+  elif sys.argv[1] in ["-h", "--help", "-help", "help"]:
     ghelp()
   else:
     print("Invalid command")

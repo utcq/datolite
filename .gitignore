@@ -3,3 +3,5 @@ testing/patched.test
 **/__pycache__/
 TODO
 *.o
+dist/
+*.egg-info/

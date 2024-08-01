@@ -23,16 +23,10 @@ def get_arch(path: str) -> tuple[int, int]:
         raise ValueError("Unsupported ELF architecture.")
 
   elif lief.is_pe(path):
-    if binary.header.machine == lief.PE.MACHINE_TYPES.AMD64:
-        return KS_ARCH_X86, KS_MODE_64
-    elif binary.header.machine == lief.PE.MACHINE_TYPES.I386:
-        return KS_ARCH_X86, KS_MODE_32
-    elif binary.header.machine == lief.PE.MACHINE_TYPES.ARM:
-        return KS_ARCH_ARM, KS_MODE_32
-    elif binary.header.machine == lief.PE.MACHINE_TYPES.ARM64:
-        return KS_ARCH_ARM64, KS_MODE_64
+    if int(binary.header.machine) == 34404:
+       return KS_ARCH_X86, KS_MODE_64
     else:
-        raise ValueError("Unsupported PE architecture.")
+       return KS_ARCH_X86, KS_MODE_32
   
   else:
       raise ValueError("Unsupported executable format.")
